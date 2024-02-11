@@ -5,18 +5,23 @@ using System.Diagnostics;
 
 namespace scrape_collector
 {
-    public class Scraper(string url)
+    public class Scraper
     {
-        private static readonly HttpClient _client = new();
-        private readonly Uri _baseAddress = new(url);
+        private static HttpClient _client = new();
+        private Uri _baseAddress;
         private int _linkCount = 0;
         private int _spinIndex = 0;
         private bool _done = false;
-        private readonly object _lock = new();
-        private readonly char[] _spinner = ['-', '\\', '|', '/'];
+        private readonly object _lock = new object();
+        private readonly char[] _spinner = new char[] { '-','\\','|','/'};
 
-        private readonly HashSet<string> _visitedPaths = [];
-        private readonly ConcurrentDictionary<string, string> _links = new();
+        private static HashSet<string> _visitedPaths = new HashSet<string>();
+        private ConcurrentDictionary<string, string> _links = new ConcurrentDictionary<string, string>();
+        
+        public Scraper(string url)
+        {
+            _baseAddress = new(url);
+        }
 
         public async Task Scrape(DirectoryInfo outputFolder)
         {
@@ -25,6 +30,7 @@ namespace scrape_collector
             _done = true;
             await statusUpdater;
         }
+
 
         private async Task StatusUpdate()
         {
@@ -85,7 +91,7 @@ namespace scrape_collector
             await Task.WhenAll(tasks);
         }
 
-        public async Task SaveAsync(string response, Uri path, DirectoryInfo outputFolder)
+        private async Task SaveAsync(string response, Uri path, DirectoryInfo outputFolder)
         {
             var name = path.Segments.Length > 1 ? path.LocalPath : "index.html";
             if (name[^1] == '\\' || name[^1] == '/')
