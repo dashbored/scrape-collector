@@ -53,7 +53,8 @@ static (string?, DirectoryInfo?) ParseArguments(string[] args)
     }
     try
     {
-        return (urlString, new DirectoryInfo(root));
+        var dir = Directory.CreateDirectory(Path.GetDirectoryName(root)!);
+        return (urlString, dir);
     }
     catch (Exception ex)
     {
