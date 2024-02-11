@@ -23,11 +23,10 @@ namespace scrape_collector
             _baseAddress = new(url);
         }
 
-        public async Task Scrape()
+        public async Task Scrape(DirectoryInfo outputFolder)
         {
-
             var statusUpdater = Task.Run(async () => await StatusUpdate());
-            await ScrapeLinkAsync(_baseAddress);            
+            await ScrapeLinkAsync(_baseAddress, outputFolder);
             _done = true;
             await statusUpdater;
         }
@@ -55,7 +54,7 @@ namespace scrape_collector
             await Task.CompletedTask;
         }
 
-        public async Task ScrapeLinkAsync(Uri url)
+        private async Task ScrapeLinkAsync(Uri url,DirectoryInfo outputFolder)
         {
             if (_links.ContainsKey(url.LocalPath))
             {
@@ -70,7 +69,7 @@ namespace scrape_collector
             }
 
             Interlocked.Increment(ref _linkCount);
-            await SaveAsync(html, url);
+            await SaveAsync(html, url, outputFolder);
             var anchors = HTMLParser.ParseHTMLforUris(html, url);
 
             var tasks = new List<Task>();
@@ -86,13 +85,13 @@ namespace scrape_collector
 
                     _visitedPaths.Add(uri.LocalPath);
                 }
-                tasks.Add(Task.Run(() => ScrapeLinkAsync(uri)));
+                tasks.Add(Task.Run(() => ScrapeLinkAsync(uri, outputFolder)));
             }
 
             await Task.WhenAll(tasks);
         }
 
-        private async Task SaveAsync(string response, Uri path)
+        private async Task SaveAsync(string response, Uri path, DirectoryInfo outputFolder)
         {
             var name = path.Segments.Length > 1 ? path.LocalPath : "index.html";
             if (name[^1] == '\\' || name[^1] == '/')
@@ -104,7 +103,7 @@ namespace scrape_collector
                 name = name[1..];
             }
 
-            var uri = new Uri(@$"C:\Temp\testfolder\");
+            var uri = new Uri(outputFolder.FullName);
             var p = Path.GetFullPath(Path.Combine(uri.LocalPath, name));
             if (!string.IsNullOrWhiteSpace(p))
             {
