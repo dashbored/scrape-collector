@@ -14,7 +14,6 @@ namespace scrape_collector
         private bool _done = false;
         private readonly object _lock = new object();
         private readonly char[] _spinner = new char[] { '-','\\','|','/'};
-        private int _spinnIndex = 0;
 
         private static HashSet<string> _visitedPaths = new HashSet<string>();
         private ConcurrentDictionary<string, string> _links = new ConcurrentDictionary<string, string>();
