@@ -5,23 +5,18 @@ using System.Diagnostics;
 
 namespace scrape_collector
 {
-    public class Scraper
+    public class Scraper(string url)
     {
-        private static HttpClient _client = new();
-        private Uri _baseAddress;
+        private static readonly HttpClient _client = new();
+        private readonly Uri _baseAddress = new(url);
         private int _linkCount = 0;
         private int _spinIndex = 0;
         private bool _done = false;
-        private readonly object _lock = new object();
-        private readonly char[] _spinner = new char[] { '-','\\','|','/'};
+        private readonly object _lock = new();
+        private readonly char[] _spinner = ['-', '\\', '|', '/'];
 
-        private static HashSet<string> _visitedPaths = new HashSet<string>();
-        private ConcurrentDictionary<string, string> _links = new ConcurrentDictionary<string, string>();
-        
-        public Scraper(string url)
-        {
-            _baseAddress = new(url);
-        }
+        private static readonly HashSet<string> _visitedPaths = [];
+        private readonly ConcurrentDictionary<string, string> _links = new();
 
         public async Task Scrape(DirectoryInfo outputFolder)
         {
