@@ -32,7 +32,7 @@ namespace scrape_collector
         {
 
             Task.Run(async () => await StatusUpdate());
-            await GetLinkAsync(_baseAddress);
+            await ScrapeLinkAsync(_baseAddress);            
         }
 
 
@@ -52,7 +52,7 @@ namespace scrape_collector
             }
         }
 
-        public async Task GetLinkAsync(Uri url)
+        public async Task ScrapeLinkAsync(Uri url)
         {
             if (_pages.ContainsKey(url.LocalPath))
             {
@@ -66,20 +66,22 @@ namespace scrape_collector
             }
             Interlocked.Increment(ref _pageCount);
             await SaveAsync(html, url);
-            var anchors = HTMLParser.ParseHTMLforAnchors(html);
+            var anchors = HTMLParser.ParseHTMLforUris(html, url);
 
             var tasks = new List<Task>();
             foreach (var anchor in anchors)
             {
-                var uris = new Uri(url, anchor);
-                var uri = new Uri(_baseAddress, uris);
-                if (_visitedPaths.Contains(uri.LocalPath) || _pages.ContainsKey(uri.LocalPath))
+                var uri = new Uri(_baseAddress, anchor);
+                lock (_lock) 
+                { 
+                    if (_visitedPaths.Contains(uri.LocalPath))
                 {
                     continue;
                 }
 
                 _visitedPaths.Add(uri.LocalPath);
-                tasks.Add(Task.Run(() => GetLinkAsync(uri)));
+                }
+                tasks.Add(Task.Run(() => ScrapeLinkAsync(uri)));
             }
             await Task.Delay(1);
             await Task.WhenAll(tasks);
