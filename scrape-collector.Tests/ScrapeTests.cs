@@ -24,7 +24,7 @@ namespace scrape_collector.Tests
                 """;
             var tempDir = Directory.CreateTempSubdirectory();
             var path = Path.Combine(tempDir.FullName, "bookshelf/test.html");
-            await scraper.SaveAsync(html, new Uri(path), tempDir);
+            await scraper.SaveAsync<string>(html, new Uri(path), tempDir);
 
             Assert.IsTrue(File.Exists(tempDir.FullName + "\\bookshelf\\test.html"));
         }
