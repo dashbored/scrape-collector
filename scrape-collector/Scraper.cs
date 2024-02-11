@@ -17,6 +17,7 @@ namespace scrape_collector
         private static HttpClient _client = new();
         private Uri _baseAddress;
         private int _linkCount = 0;
+        private int _spinIndex = 0;
         private bool _done = false;
         private readonly object _lock = new object();
         private readonly char[] _spinner = new char[] { '-','\\','|','/'};
@@ -49,7 +50,7 @@ namespace scrape_collector
             {
                 Console.Clear();
                 Console.WriteLine(header);
-                Console.WriteLine($"Links downloaded[{_spinner[_spinnIndex++%4]}]:{_linkCount} ");
+                Console.WriteLine($"Links downloaded[{_spinner[_spinIndex++%4]}]:{_linkCount} ");
 
                 await Task.Delay(500);
             }
