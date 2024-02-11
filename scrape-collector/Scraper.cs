@@ -86,7 +86,7 @@ namespace scrape_collector
             await Task.WhenAll(tasks);
         }
 
-        private async Task SaveAsync(string response, Uri path, DirectoryInfo outputFolder)
+        public async Task SaveAsync(string response, Uri path, DirectoryInfo outputFolder)
         {
             var name = path.Segments.Length > 1 ? path.LocalPath : "index.html";
             if (name[^1] == '\\' || name[^1] == '/')
