@@ -11,7 +11,8 @@ namespace scrape_collector.Helpers
     {
           public static HashSet<Uri> ParseHTMLforUris(string html, Uri baseUri)
         {
-            var pattern = "<a\\s+(?:[^>]*?\\s+)?href=([\"'])(.*?)\\1";
+            //var pattern = "<a\\s+(?:[^>]*?\\s+)?href=([\"'])(.*?)\\1";
+            var pattern = "(?:href|src)=([\"'])(.*?)\\1";
             var anchors = new HashSet<Uri>();
             foreach (Match match in Regex.Matches(html, pattern, RegexOptions.IgnoreCase))
             {
